@@ -1,3 +1,0 @@
-- rotation
-- better ambient occlusion
-- glow

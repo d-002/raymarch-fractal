@@ -4,14 +4,17 @@
 #include "utils.h"
 
 uint32_t getcol(struct ray_info *info) {
+    double color;
+
     if (info->hit) {
         // ambient occlusion
-        double occl = 2 / (1 + exp(-info->iterations / 30.0)) - 1;
-        occl = CLAMP(occl, 0, 1);
-
-        return ((uint8_t)(255 - 255*occl)) * 0x10101;
+        color = 2 / (1 + exp(-info->iterations / 30.0)) - 1;
+        color = 1 - CLAMP(color, 0, 1);
+    }
+    else {
+        // glow
+        color = 0.2 * THRESHOLD/(info->min_dist);
     }
 
-    // glow
-    return 0;
+    return ((uint8_t)(255*color)) * 0x10101;
 }
