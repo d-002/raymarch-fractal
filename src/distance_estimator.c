@@ -8,13 +8,13 @@
 #define ESCAPE_RADIUS 256
 
 double hypersphere_de(quat q) {
-    double d = qt_dot(q, q) - 1;
+    double d = qt_dot(q) - 1;
     return CLAMP(d, 0, 1);
 }
 
 double julia_de(quat q) {
-    complex z = { q.x, q.y };
-    complex c = { q.z, q.w };
+    complex z = { q.z, q.w };
+    complex c = { q.x, q.y };
 
     complex dz = { 1, 0 };
     double r;

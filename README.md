@@ -2,6 +2,8 @@
 
 Raymarched, 4D Julia set fractals
 
+CPU for now
+
 Requires `SDL2`
 
 ### build

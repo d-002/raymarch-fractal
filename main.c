@@ -9,7 +9,6 @@
 #include "src/quaternion.h"
 #include "src/distance_estimator.h"
 #include "src/raymarch.h"
-#include "src/postpro.h"
 
 SDL_Window *window = NULL;
 SDL_Renderer *renderer;
@@ -78,36 +77,14 @@ void quit() {
     SDL_Quit();
 }
 
-void renderScene() {
+int main() {
+    init();
     uint32_t *pixels = malloc(WIDTH * HEIGHT * sizeof(uint32_t));
 
-    // test 2D mandelbrot display
-
-    int w2 = WIDTH/2, h2 = HEIGHT/2;
-    double mult = 0.01;
-    complex pos = { 0, 0 };
-
-    for (int x = 0; x < WIDTH; x++)
-        for (int y = 0; y < HEIGHT; y++) {
-            quat q = { (x-w2) * mult + pos.real, (y-h2) * mult + pos.imag, 0.5, 0 };
-
-            float d = hypersphere_de(q);
-            struct ray_info info;
-            ray(q, q, &info, hypersphere_de);
-            uint8_t col = d*255;
-
-            pixels[y*WIDTH + x] = col * 0x10101;
-        }
-
+    renderScene(pixels, julia_de);
     updateScreen(pixels);
 
     free(pixels);
-}
-
-int main() {
-    init();
-
-    renderScene();
 
     mainloop();
     quit();
