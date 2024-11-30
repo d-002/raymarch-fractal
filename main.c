@@ -4,9 +4,9 @@
 #include <SDL2/SDL.h>
 #include <err.h>
 
-#include "utils.h"
-#include "quaternion.h"
-#include "distance_estimator.h"
+#include "src/utils.h"
+#include "src/quaternion.h"
+#include "src/distance_estimator.h"
 
 SDL_Window *window = NULL;
 SDL_Renderer *renderer;
