@@ -4,7 +4,7 @@
 #include "complex.h"
 #include "utils.h"
 
-#define ITERATIONS 50
+#define ITERATIONS 200
 #define ESCAPE_RADIUS 256
 
 double hypersphere_de(quat q) {
@@ -15,6 +15,12 @@ double hypersphere_de(quat q) {
 double julia_de(quat q) {
     complex z = { q.z, q.w };
     complex c = { q.x, q.y };
+
+    double zreal = 0;
+    if (z.real > 0) {
+        zreal = z.real;
+        z.real = 0;
+    }
 
     complex dz = { 1, 0 };
     double r;
@@ -27,6 +33,7 @@ double julia_de(quat q) {
         z = comp_add(comp_mul(z, z), c);
     }
 
+    if (r < 2 && zreal) return zreal;
     if (r < 2) return 0;
 
     // compute modules
@@ -34,5 +41,6 @@ double julia_de(quat q) {
     double mdz = sqrt(comp_dot(dz));
     double d = mz * log(mz) / mdz;
 
+    if (zreal) return sqrt(d*d + zreal*zreal);
     return CLAMP(d, 0, 1);
 }

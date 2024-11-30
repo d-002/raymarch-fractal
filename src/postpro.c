@@ -8,7 +8,7 @@ uint32_t getcol(struct ray_info *info) {
 
     if (info->hit) {
         // ambient occlusion
-        color = 2 / (1 + exp(-info->iterations / 30.0)) - 1;
+        color = 2 / (1 + exp(-info->iterations / 100.0)) - 1;
         color = 1 - CLAMP(color, 0, 1);
     }
     else {

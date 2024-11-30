@@ -1,12 +1,14 @@
 #ifndef RAYMARCH_H
 #define RAYMARCH_H
 
-#define THRESHOLD 0.01
+#define THRESHOLD 0.0001
 #define FAR 1000
 #define FOV_DEG 90
 
 #include "quaternion.h"
 #include "distance_estimator.h"
+
+extern int res;
 
 struct camera {
     quat pos;

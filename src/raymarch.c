@@ -5,7 +5,7 @@
 #include "utils.h"
 #include "postpro.h"
 
-#define RES 4
+int res = 4;
 
 void ray(quat q, quat dir, struct ray_info *info, dist_estimator estimator) {
     double d = 1;
@@ -58,8 +58,8 @@ void renderScene(uint32_t *pixels, dist_estimator estimator, struct camera *cam)
 
     int w2 = WIDTH/2, h2 = HEIGHT/2;
 
-    for (int x = 0; x < WIDTH; x += RES)
-        for (int y = 0; y < HEIGHT; y += RES) {
+    for (int x = 0; x < WIDTH; x += res)
+        for (int y = 0; y < HEIGHT; y += res) {
             quat dir = { x-w2, h2-y, -D, 0 };
             dir = qt_norm(rotate(dir, cam->rot));
 
@@ -67,12 +67,9 @@ void renderScene(uint32_t *pixels, dist_estimator estimator, struct camera *cam)
             ray(cam->pos, dir, &info, estimator);
 
             uint32_t col = getcol(&info);
-            #if RES == 1
-            pixels[y*WIDTH + x] = col;
-            #else
-            for (int dx = 0; dx < RES; dx++)
-                for (int dy = 0; dy < RES; dy++)
+            //pixels[y*WIDTH + x] = col;
+            for (int dx = 0; dx < res; dx++)
+                for (int dy = 0; dy < res; dy++)
                     pixels[(y+dy)*WIDTH + x+dx] = col;
-            #endif
         }
 }

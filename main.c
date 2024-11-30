@@ -17,7 +17,7 @@ SDL_Texture *pixBuf = NULL;
 void init() {
     if (SDL_Init(SDL_INIT_VIDEO)) errx(1, "%s", SDL_GetError());
 
-    window = SDL_CreateWindow("Filter",
+    window = SDL_CreateWindow("Raymarched fractals",
                               SDL_WINDOWPOS_CENTERED,
                               0,
                               WIDTH,
@@ -107,6 +107,8 @@ int checkEvents(struct camera *cam) {
             case SDLK_RIGHT:
                 cam->rot[2] -= rotation;
                 break;
+            case SDLK_RETURN:
+                res = res == 1 ? 4 : 1;
         }
     }
 
