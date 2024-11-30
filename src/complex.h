@@ -5,10 +5,10 @@ typedef struct complex {
     double real, imag;
 } complex;
 
-void comp_add(complex *c1, complex *c2, complex *res);
-void comp_sub(complex *c1, complex *c2, complex *res);
-void comp_mul(complex *c1, complex *c2, complex *res);
-void comp_scal_mul(complex *c1, double m, complex *res);
-double comp_dot(complex *c);
+complex comp_add(complex, complex);
+complex comp_sub(complex, complex);
+complex comp_mul(complex, complex);
+complex comp_mul2add1(complex);
+double comp_dot(complex);
 
 #endif /* COMPLEX_H */
