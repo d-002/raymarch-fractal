@@ -8,7 +8,8 @@ SDL = -lSDL2
 MATH = -lm -ldl
 LDLIBS = $(SDL) $(MATH)
 
-OBJ = main.o src/utils.o src/complex.o src/quaternion.o src/distance_estimator.o src/raymarch.o
+FIND_O = $(subst .c,.o,$(shell find $(1) -name "*.c" -type f))
+OBJ = main.o $(call FIND_O,src)
 
 #SANITIZER = -fsanitize=address
 #SANITIZER =
