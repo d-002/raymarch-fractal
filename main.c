@@ -87,7 +87,7 @@ void renderScene() {
 
     for (int x = 0; x < WIDTH; x++)
         for (int y = 0; y < HEIGHT; y++) {
-            quat q = { 0, 0, (x-w2) * mult, (y-h2) * mult };
+            quat q = { 0, 0, (x-w2) * mult + pos.real, (y-h2) * mult + pos.imag };
 
             float d = julia_de(&q);
             uint8_t col = d*255;
