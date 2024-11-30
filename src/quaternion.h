@@ -5,7 +5,7 @@ typedef struct quat {
     double x, y, z, w;
 } quat;
 
-double qt_dot(quat, quat);
+double qt_dot(quat);
 quat qt_norm(quat);
 quat qt_add(quat, quat);
 quat qt_sub(quat, quat);

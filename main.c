@@ -92,6 +92,8 @@ void renderScene() {
             quat q = { (x-w2) * mult + pos.real, (y-h2) * mult + pos.imag, 0.5, 0 };
 
             float d = hypersphere_de(q);
+            struct ray_info info;
+            ray(q, q, &info, hypersphere_de);
             uint8_t col = d*255;
 
             pixels[y*WIDTH + x] = col * 0x10101;

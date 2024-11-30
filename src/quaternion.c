@@ -2,12 +2,12 @@
 
 #include "quaternion.h"
 
-double qt_dot(quat q1, quat q2) {
-    return q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w;
+double qt_dot(quat q) {
+    return q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
 }
 
 quat qt_norm(quat q) {
-    double invLength = 1 / sqrt(qt_dot(q, q));
+    double invLength = 1 / sqrt(qt_dot(q));
     return (quat) {
         q.x * invLength,
         q.y * invLength,

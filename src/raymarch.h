@@ -2,9 +2,10 @@
 #define RAYMARCH_H
 
 #define THRESHOLD 0.01
-#define FAR2 1000
+#define FAR 1000
 
 #include "quaternion.h"
+#include "distance_estimator.h"
 
 struct ray_info {
     int hit;
@@ -12,6 +13,6 @@ struct ray_info {
     long iterations;
 };
 
-void ray(quat, quat, struct ray_info *);
+void ray(quat, quat, struct ray_info *, dist_estimator);
 
 #endif /* RAYMARCH_H */
