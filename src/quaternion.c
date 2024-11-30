@@ -1,3 +1,5 @@
+#include "quaternion.h"
+
 double qt_dot(quat *q1, quat *q2) {
     return q1->x * q2->x + q1->y * q2->y + q1->z * q2->z + q1->w * q2->w;
 }

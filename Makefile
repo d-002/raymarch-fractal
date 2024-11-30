@@ -8,7 +8,7 @@ SDL = -lSDL2
 MATH = -lm -ldl
 LDLIBS = $(SDL) $(MATH)
 
-OBJ = main.o src/utils.o src/quaternion.o src/distance_estimator.o
+OBJ = main.o src/utils.o src/complex.o src/quaternion.o src/distance_estimator.o
 
 #SANITIZER = -fsanitize=address
 #SANITIZER =
