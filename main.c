@@ -81,6 +81,7 @@ int main() {
     init();
     uint32_t *pixels = malloc(WIDTH * HEIGHT * sizeof(uint32_t));
 
+    //renderScene(pixels, hypersphere_de);
     renderScene(pixels, julia_de);
     updateScreen(pixels);
 

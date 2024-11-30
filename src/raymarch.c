@@ -5,7 +5,8 @@
 #include "utils.h"
 #include "postpro.h"
 
-quat cam_pos = { -2, 0, 5, 0 };
+quat cam_pos = { -2, 0, 3, 0 };
+//quat cam_pos = { 0, 0, 5, 0 };
 // rotation: z/w, then around x axis, then around y axis
 double cam_rot[3] = { 0, 0, 0 };
 
@@ -17,7 +18,7 @@ void ray(quat q, quat dir, struct ray_info *info, dist_estimator estimator) {
     while (d > THRESHOLD && qt_dot(q) < FAR) {
         d = estimator(q);
         if (d < min_dist) min_dist = d;
-        q = qt_add(q, qt_mul(dir, d));
+        q = qt_add(q, qt_mul(dir, d*0.5));
 
         iterations++;
     }
