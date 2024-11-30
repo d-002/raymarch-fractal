@@ -12,6 +12,8 @@
 #define HEIGHT 480
 #define FPS 60
 
+#define CLAMP(x, a, b) ((x) < (a) ? (a) : (x) > (b) ? (b) : (x))
+
 // avoid warnings
 void usleep(unsigned int);
 

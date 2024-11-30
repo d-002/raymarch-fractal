@@ -19,3 +19,7 @@ void comp_scal_mul(complex *c1, double m, complex *res) {
     res->real *= m;
     res->imag *= m;
 }
+
+double comp_dot(complex *c) {
+    return c->real * c->real + c->imag * c->imag;
+}

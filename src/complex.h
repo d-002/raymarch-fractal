@@ -9,5 +9,6 @@ void comp_add(complex *c1, complex *c2, complex *res);
 void comp_sub(complex *c1, complex *c2, complex *res);
 void comp_mul(complex *c1, complex *c2, complex *res);
 void comp_scal_mul(complex *c1, double m, complex *res);
+double comp_dot(complex *c);
 
 #endif /* COMPLEX_H */

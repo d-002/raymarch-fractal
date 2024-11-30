@@ -5,6 +5,7 @@
 #include <err.h>
 
 #include "src/utils.h"
+#include "src/complex.h"
 #include "src/quaternion.h"
 #include "src/distance_estimator.h"
 
@@ -62,6 +63,12 @@ void mainloop() {
     }
 }
 
+void updateScreen(uint32_t *pixels) {
+    SDL_UpdateTexture(pixBuf, NULL, pixels, WIDTH*sizeof(uint32_t));
+    SDL_RenderCopy(renderer, pixBuf, NULL, NULL);
+    SDL_RenderPresent(renderer);
+}
+
 void quit() {
     SDL_DestroyTexture(pixBuf);
     SDL_DestroyRenderer(renderer);
@@ -70,6 +77,27 @@ void quit() {
 }
 
 void renderScene() {
+    uint32_t *pixels = malloc(WIDTH * HEIGHT * sizeof(uint32_t));
+
+    // test 2D mandelbrot display
+
+    int w2 = WIDTH/2, h2 = HEIGHT/2;
+    double mult = 0.01;
+    complex pos = { -0.5, 0 };
+
+    for (int x = 0; x < WIDTH; x++)
+        for (int y = 0; y < HEIGHT; y++) {
+            quat q = { 0, 0, (x-w2) * mult, (y-h2) * mult };
+
+            float d = julia_de(&q);
+            uint8_t col = d*255;
+
+            pixels[y*WIDTH + x] = col * 0x10101;
+        }
+
+    updateScreen(pixels);
+
+    free(pixels);
 }
 
 int main() {

@@ -1,7 +1,17 @@
+#include <math.h>
+
 #include "quaternion.h"
 
 double qt_dot(quat *q1, quat *q2) {
     return q1->x * q2->x + q1->y * q2->y + q1->z * q2->z + q1->w * q2->w;
+}
+
+void qt_norm(quat *q) {
+    double invLength = 1 / sqrt(qt_dot(q, q));
+    q->x *= invLength;
+    q->y *= invLength;
+    q->z *= invLength;
+    q->w *= invLength;
 }
 
 void qt_add(quat *q1, quat *q2, quat *res) {
