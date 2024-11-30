@@ -36,25 +36,92 @@ void init() {
     if (!pixBuf) errx(1, "no pixbuf: %s", SDL_GetError());
 }
 
+int checkClose(SDL_Event event) {
+    switch (event.type) {
+        case SDL_QUIT:
+            return 1;
+        case SDL_KEYDOWN:
+            if (event.key.keysym.sym == SDLK_ESCAPE)
+                return 1;
+    }
+
+    return 0;
+}
+
+int checkEvents(struct camera *cam) {
+    SDL_Event event;
+
+    const double movement = 0.1;
+    const double rotation = 0.1;
+
+    while (SDL_PollEvent(&event)) {
+        if (checkClose(event)) return 1;
+
+        if (event.type != SDL_KEYDOWN) continue;
+
+        double c = cos(cam->rot[2]), s = sin(cam->rot[2]);
+        switch(event.key.keysym.sym) {
+            case SDLK_z:
+                cam->pos.x -= movement*s;
+                cam->pos.z -= movement*c;
+                break;
+            case SDLK_q:
+                cam->pos.x -= movement*c;
+                cam->pos.z += movement*s;
+                break;
+            case SDLK_s:
+                cam->pos.x += movement*s;
+                cam->pos.z += movement*c;
+                break;
+            case SDLK_d:
+                cam->pos.x += movement*c;
+                cam->pos.z -= movement*s;
+                break;
+            case SDLK_a:
+                cam->pos.w -= movement;
+                break;
+            case SDLK_e:
+                cam->pos.w += movement;
+                break;
+            case SDLK_SPACE:
+                cam->pos.y += movement;
+                break;
+            case SDLK_LSHIFT:
+                cam->pos.y -= movement;
+                break;
+            case SDLK_l:
+                cam->rot[0] -= rotation;
+                break;
+            case SDLK_m:
+                cam->rot[0] += rotation;
+                break;
+            case SDLK_UP:
+                cam->rot[1] += rotation;
+                break;
+            case SDLK_DOWN:
+                cam->rot[1] -= rotation;
+                break;
+            case SDLK_LEFT:
+                cam->rot[2] += rotation;
+                break;
+            case SDLK_RIGHT:
+                cam->rot[2] -= rotation;
+                break;
+        }
+    }
+
+    return 0;
+}
+
 void mainloop() {
     SDL_Event event;
 
     // main loop, wait for the window to be closed
-    int running = 1;
     double prev = tstamp(), now;
 
-    while (running) {
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-                case SDL_QUIT:
-                    running = 0;
-                    break;
-                case SDL_KEYDOWN:
-                    if (event.key.keysym.sym == SDLK_ESCAPE) running = 0;
-                    break;
-            }
-            if (!running) break;
-        }
+    while (1) {
+        while (SDL_PollEvent(&event))
+            if (checkClose(event)) break;
 
         // limit framerate
         now = tstamp();
@@ -81,13 +148,19 @@ int main() {
     init();
     uint32_t *pixels = malloc(WIDTH * HEIGHT * sizeof(uint32_t));
 
-    //renderScene(pixels, hypersphere_de);
-    renderScene(pixels, julia_de);
-    updateScreen(pixels);
+    struct camera cam = {
+        { -2, 0, 3, 0 },
+        { 0, 0, 0 }
+    };
+    while (1) {
+        renderScene(pixels, julia_de, &cam);
+        updateScreen(pixels);
+
+        if (checkEvents(&cam)) break;
+    }
 
     free(pixels);
 
-    mainloop();
     quit();
     return 0;
 }
