@@ -3,7 +3,7 @@
 
 #include "quaternion.h"
 
-double hypersphere_de(quat *);
-double julia_de(quat *);
+double hypersphere_de(quat);
+double julia_de(quat);
 
 #endif /* DISTANCE_ESTIMATOR_H */

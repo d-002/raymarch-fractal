@@ -7,13 +7,14 @@
 #define ITERATIONS 50
 #define ESCAPE_RADIUS 256
 
-double hypersphere_de(quat *q) {
-    return 0;
+double hypersphere_de(quat q) {
+    double d = qt_dot(q, q) - 1;
+    return CLAMP(d, 0, 1);
 }
 
-double julia_de(quat *q) {
-    complex z = { q->x, q->y };
-    complex c = { q->z, q->w };
+double julia_de(quat q) {
+    complex z = { q.x, q.y };
+    complex c = { q.z, q.w };
 
     complex dz = { 1, 0 };
     double r;
@@ -26,7 +27,7 @@ double julia_de(quat *q) {
         z = comp_add(comp_mul(z, z), c);
     }
 
-    if (r < 2) return 1;
+    if (r < 2) return 0;
 
     // compute modules
     double mz = sqrt(r);
