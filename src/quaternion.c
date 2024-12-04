@@ -1,6 +1,6 @@
-#include <math.h>
-
 #include "quaternion.h"
+
+#include <math.h>
 
 double qt_dot(quat q) {
     return q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;

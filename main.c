@@ -61,11 +61,11 @@ int checkEvents(struct camera *cam) {
 
         double c = cos(cam->rot[2]), s = sin(cam->rot[2]);
         switch(event.key.keysym.sym) {
-            case SDLK_z:
+            case SDLK_w:
                 cam->pos.x -= movement*s;
                 cam->pos.z -= movement*c;
                 break;
-            case SDLK_q:
+            case SDLK_a:
                 cam->pos.x -= movement*c;
                 cam->pos.z += movement*s;
                 break;
@@ -77,7 +77,7 @@ int checkEvents(struct camera *cam) {
                 cam->pos.x += movement*c;
                 cam->pos.z -= movement*s;
                 break;
-            case SDLK_a:
+            case SDLK_q:
                 cam->pos.w -= movement;
                 break;
             case SDLK_e:

@@ -1,6 +1,7 @@
+#include "distance_estimator.h"
+
 #include <math.h>
 
-#include "distance_estimator.h"
 #include "complex.h"
 #include "utils.h"
 
@@ -17,7 +18,7 @@ double julia_de(quat q) {
     complex c = { q.x, q.y };
 
     double zreal = 0;
-    if (z.real > 0) {
+    if (z.real > 0 && 0) {
         zreal = z.real;
         z.real = 0;
     }

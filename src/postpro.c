@@ -1,6 +1,7 @@
+#include "postpro.h"
+
 #include <math.h>
 
-#include "postpro.h"
 #include "utils.h"
 
 uint32_t getcol(struct ray_info *info) {

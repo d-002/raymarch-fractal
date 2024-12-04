@@ -5,6 +5,8 @@
 #define FAR 1000
 #define FOV_DEG 90
 
+#include <stdint.h>
+
 #include "quaternion.h"
 #include "distance_estimator.h"
 

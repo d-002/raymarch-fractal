@@ -1,7 +1,7 @@
-#include <math.h>
-#include <stdint.h>
-
 #include "raymarch.h"
+
+#include <math.h>
+
 #include "utils.h"
 #include "postpro.h"
 
