@@ -4,7 +4,7 @@
 
 #include "utils.h"
 
-uint32_t getcol(struct ray_info *info) {
+void getcol(struct ray_info *info, uint8_t *r, uint8_t *g, uint8_t *b) {
     double color;
 
     if (info->hit) {
@@ -17,5 +17,8 @@ uint32_t getcol(struct ray_info *info) {
         color = 0.2 * THRESHOLD/(info->min_dist);
     }
 
-    return ((uint8_t)(255*color)) * 0x10101;
+    uint8_t col = 255*color;
+    *r = col;
+    *g = col;
+    *b = col;
 }

@@ -5,6 +5,6 @@
 
 #include "raymarch.h"
 
-uint32_t getcol(struct ray_info *);
+void getcol(struct ray_info *, uint8_t *, uint8_t *, uint8_t *);
 
 #endif /* POSTPRO_H */

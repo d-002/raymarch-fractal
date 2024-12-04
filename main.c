@@ -109,6 +109,7 @@ int checkEvents(struct camera *cam) {
                 break;
             case SDLK_RETURN:
                 res = res == 1 ? 4 : 1;
+                aalias = aalias == 1 ? 2 : 1;
         }
     }
 

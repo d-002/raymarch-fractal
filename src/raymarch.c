@@ -6,6 +6,7 @@
 #include "postpro.h"
 
 int res = 4;
+int aalias = 1;
 
 void ray(quat q, quat dir, struct ray_info *info, dist_estimator estimator) {
     double d = 1;
@@ -58,16 +59,31 @@ void renderScene(uint32_t *pixels, dist_estimator estimator, struct camera *cam)
 
     int w2 = WIDTH/2, h2 = HEIGHT/2;
 
+    float step = 1.0/aalias;
+    float colMult = step/aalias;
     for (int x = 0; x < WIDTH; x += res)
         for (int y = 0; y < HEIGHT; y += res) {
-            quat dir = { x-w2, h2-y, -D, 0 };
-            dir = qt_norm(rotate(dir, cam->rot));
+            float r = 0, g = 0, b = 0;
 
-            struct ray_info info;
-            ray(cam->pos, dir, &info, estimator);
+            for (float dx = 0; dx < 1; dx += step)
+                for (float dy = 0; dy < 1; dy += step) {
+                    quat dir = { x+dx-w2, h2-y-dy, -D, 0 };
+                    dir = qt_norm(rotate(dir, cam->rot));
 
-            uint32_t col = getcol(&info);
-            //pixels[y*WIDTH + x] = col;
+                    struct ray_info info;
+                    ray(cam->pos, dir, &info, estimator);
+
+                    uint8_t r_, g_, b_;
+                    getcol(&info, &r_, &g_, &b_);
+                    r += r_*colMult;
+                    g += g_*colMult;
+                    b += b_*colMult;
+                }
+            uint32_t col =
+                ((uint8_t)r << 16) +
+                ((uint8_t)g << 8) +
+                (uint8_t)b;
+
             for (int dx = 0; dx < res; dx++)
                 for (int dy = 0; dy < res; dy++)
                     pixels[(y+dy)*WIDTH + x+dx] = col;

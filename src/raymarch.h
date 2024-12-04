@@ -5,12 +5,15 @@
 #define FAR 1000
 #define FOV_DEG 90
 
+#define AALIAS 4
+
 #include <stdint.h>
 
 #include "quaternion.h"
 #include "distance_estimator.h"
 
 extern int res;
+extern int aalias;
 
 struct camera {
     quat pos;
