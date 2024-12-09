@@ -9,7 +9,6 @@ Requires `SDL2`
 ### Build
 ```
 make
-./main
 ```
 
 ## Screenshots

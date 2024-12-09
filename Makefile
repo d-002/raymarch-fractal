@@ -11,7 +11,7 @@ LDLIBS = $(SDL) $(MATH)
 FIND_O = $(subst .c,.o,$(shell find $(1) -name "*.c" -type f))
 OBJ = main.o $(call FIND_O,src)
 
-#SANITIZER = -fsanitize=address
+SANITIZER = -fsanitize=address
 #SANITIZER =
 
 .PHONY: all clean
