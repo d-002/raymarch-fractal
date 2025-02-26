@@ -30,21 +30,18 @@ quat rotate(quat q, double *rot) {
     // rotate quaternion depending on the camera rotations
     // input quaternion should be normalized and have its w component to 0
 
-    ///// TODO: cache cos and sin
-
-    double x, y, z;
-    z = q.z;
+    double z = q.z;
     double c0 = cos(rot[0]), s0 = sin(rot[0]);
     q.z = z*c0;
     q.w = z*s0;
 
-    y = q.y;
+    double y = q.y;
     z = q.z;
     double c1 = cos(rot[1]), s1 = sin(rot[1]);
     q.y = y*c1 - z*s1;
     q.z = z*c1 + y*s1;
 
-    x = q.x;
+    double x = q.x;
     z = q.z;
     double c2 = cos(rot[2]), s2 = sin(rot[2]);
     q.x = x*c2 + z*s2;
