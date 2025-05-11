@@ -1,0 +1,316 @@
+#pragma kernel CSMain
+
+//#define USE_ALIAS
+#define USED_SDF julia_sdf
+//#define USED_SDF hypercube_sdf
+#define CROP_HALF
+#define TAU 6.283185307179586 
+
+RWTexture2D<float4> Result;
+float4 _ScreenSize; // (width, height, null, null)
+
+const float _Time;
+
+const float4 _CamPos;
+const float4 _CamRot0, _CamRot1, _CamRot2, _CamRot3;
+
+const float4 _Col, _BgCol0, _BgCol1, _FogCol;
+
+const int ALIAS;
+
+const float _Step;
+
+const float _FogDist;
+const float _FogDepth;
+
+static const matrix _CamRot = matrix(_CamRot0, _CamRot1, _CamRot2, _CamRot3);
+
+static const float FOV = radians(90);
+static const float D = _ScreenSize.x/2 / atan(FOV/2);
+static const float THRESHOLD = 0.0002;
+static const float MAXDIST2 = pow(100, 2);
+
+static const uint ITERATIONS = 256;
+static const uint ESCAPE_RADIUS = 16384;
+
+static const uint ALIAS2 = ALIAS*ALIAS;
+static const float DIV_ALIAS = 1. / ALIAS;
+static const float DIV_ALIAS2 = 1. / ALIAS2;
+
+static const float4 PRNG_VEC = float4(76.8371,20.7709,35.6887,22.5163);
+static const float PRNG_FLOAT = 16522.4287391;
+
+static const int PERLIN_RES = 4;
+static const int PERLIN_OCTAVES = 4;
+
+static const float2 SCREEN_CENTER = _ScreenSize.xy * .5;
+static const float SCREEN_SQRT2 = distance(SCREEN_CENTER, 0);
+
+static const float VIGNETTE = .3;
+
+struct float6
+{
+    float x, y, z, w, u, v;
+};
+
+struct Info
+{
+    float min_dist;
+    float steps;
+    float4 end_pos;
+    float next_r;
+};
+
+float6 genFloat6(float _x, float _y, float _z, float _w, float _u, float _v)
+{
+    float6 obj;
+    obj.x = _x;
+    obj.y = _y;
+    obj.z = _z;
+    obj.w = _w;
+    obj.u = _u;
+    obj.v = _v;
+
+    return obj;
+}
+
+inline float2 comp_mul(float2 a, float2 b)
+{
+    return float2(
+        a.x*b.x - a.y*b.y,
+        a.x*b.y + a.y*b.x
+    );
+}
+
+inline float dist2(float4 v)
+{
+    return v.x*v.x + v.y*v.y + v.z*v.z + v.w*v.w;
+}
+
+float hypersphere_sdf(float4 q)
+{
+    float d = dot(q, q) - 2;
+    return clamp(d, 0, 1);
+}
+
+float hypercube_sdf(float4 q)
+{
+    float dx = abs(q.x) - 2,
+          dy = abs(q.y) - 2,
+          dz = abs(q.z) - 2,
+          dw = abs(q.w) - 2;
+
+    return max(max(dx, dy), max(dz, dw));
+}
+
+// returns (signed distance, position next iteration)
+float2 julia_sdf(float4 q)
+{
+    float2 c = q.xy, z = q.zw;
+
+    #ifdef CROP_HALF
+    float zreal = 0;
+    if (z.x > 0)
+    {
+        zreal = z.x;
+        z.x = 0;
+    }
+    #endif
+
+    float2 dz = float2(1, 0);
+    float r = 0;
+
+    for (uint n = 0; n < ITERATIONS; n++)
+    {
+        r = dot(z, z);
+        if (r > (float)ESCAPE_RADIUS) break;
+
+        dz = comp_mul(dz, z) * 2 + 1;
+        z = comp_mul(z, z) + c;
+    }
+
+    #ifdef CROP_HALF
+    if (r < 2) return float2(zreal, r);
+    #endif
+
+    // compute modules
+    float mz = sqrt(r);
+    float mdz = sqrt(dot(dz, dz));
+    float d = mz * log(mz) / mdz;
+
+    #ifdef CROP_HALF
+    if (zreal) return float2(sqrt(d * d + zreal * zreal), r);
+    #endif
+    return float2(clamp(d, 0, 1), r);
+}
+
+float4 get_ray(float2 tex_pos)
+{
+    float4 dir = float4(SCREEN_CENTER - tex_pos, -D, 0);
+
+    return normalize(mul(_CamRot, dir));
+}
+
+Info get_ray_info(float4 ray)
+{
+    float4 pos = _CamPos;
+    float2 res = USED_SDF(pos);
+    float dist = res.x;
+    float next_r = res.y;
+
+    Info info;
+    info.min_dist = dist;
+    info.steps = 0;
+
+    while (true)
+    {
+        float camDist = dist2(pos-_CamPos);
+        if (camDist > MAXDIST2) break;
+
+        res = USED_SDF(pos);
+        dist = res.x;
+        next_r = res.y;
+        if (dist < info.min_dist) info.min_dist = dist;
+
+        if (dist <= THRESHOLD) {
+            info.steps += dist/THRESHOLD; // smoothing
+            info.min_dist = 0;
+            break;
+        }
+
+        pos += ray*dist*_Step;
+        info.steps += 1;
+    }
+
+    info.end_pos = pos;
+    info.next_r = next_r;
+    return info;
+}
+
+inline float white(float4 pos)
+{
+    return frac(sin(dot(pos,PRNG_VEC))*PRNG_FLOAT);
+}
+
+inline float rand_dot(float4 i, float4 f, float4 offset)
+{
+    float angle = white(i + offset) * TAU;
+
+    return cos(angle) * (offset.x-f.x) + sin(angle) * (offset.y-f.y);
+}
+
+float perlin(float4 pos)
+{
+    float4 I = floor(pos), F = frac(pos);
+
+    float a = rand_dot(I, F, float4(0, 0, 0, 0));
+    float b = rand_dot(I, F, float4(1, 0, 0, 0));
+    float c = rand_dot(I, F, float4(0, 1, 0, 0));
+    float d = rand_dot(I, F, float4(1, 1, 0, 0));
+    float e = rand_dot(I, F, float4(0, 0, 1, 0));
+    float f = rand_dot(I, F, float4(1, 0, 1, 0));
+    float g = rand_dot(I, F, float4(0, 1, 1, 0));
+    float h = rand_dot(I, F, float4(1, 1, 1, 0));
+    float i = rand_dot(I, F, float4(0, 0, 0, 1));
+    float j = rand_dot(I, F, float4(1, 0, 0, 1));
+    float k = rand_dot(I, F, float4(0, 1, 0, 1));
+    float l = rand_dot(I, F, float4(1, 1, 0, 1));
+    float m = rand_dot(I, F, float4(0, 0, 1, 1));
+    float n = rand_dot(I, F, float4(1, 0, 1, 1));
+    float o = rand_dot(I, F, float4(0, 1, 1, 1));
+    float p = rand_dot(I, F, float4(1, 1, 1, 1));
+
+    F.x = (3 - 2*F.x) * F.x * F.x;
+    F.y = (3 - 2*F.y) * F.y * F.y;
+    F.z = (3 - 2*F.z) * F.z * F.z;
+    F.w = (3 - 2*F.w) * F.w * F.w;
+
+    float cube0 = lerp(
+        lerp(lerp(a, b, F.x), lerp(c, d, F.x), F.y),
+        lerp(lerp(e, f, F.x), lerp(g, h, F.x), F.y),
+        F.z
+    );
+    float cube1 = lerp(
+        lerp(lerp(i, j, F.x), lerp(k, l, F.x), F.y),
+        lerp(lerp(m, n, F.x), lerp(o, p, F.x), F.y),
+        F.z
+    );
+
+    return lerp(cube0, cube1, F.w);
+}
+
+float fractal_perlin(float4 pos)
+{
+    float value = 0;
+    for (float o = 1; o <= PERLIN_OCTAVES; o += 1)
+    {
+        value += perlin(pos) / (o*o);
+        pos *= 2;
+    }
+
+    return value;
+}
+
+float4 post_pro(float2 screenPos, float4 ray, Info info)
+{
+    bool hit = info.min_dist <= 0;
+    float4 color;
+
+    if (hit)
+    {
+        // ambient occlusion, affected by the step size to not get too dark
+        float occlusion = 1 / exp(.015 * info.steps * _Step);
+
+        color = _Col * occlusion;
+    }
+    else
+    {
+        // glow
+        float glow = 1 - 1 / (1+info.min_dist);
+
+        color = lerp(_BgCol0, _BgCol1, glow);
+    }
+
+    // fog
+    float fog = 1 / (1 + exp(_FogDist - _FogDepth * dist2(info.end_pos-_CamPos)));
+    
+    // add texture to fog using perlin noise
+    fog *= fractal_perlin((_CamPos + ray) * PERLIN_RES)/3 + .4;
+
+    color = lerp(color, _FogCol, fog);
+
+    // vignette
+    float dist = distance(screenPos, SCREEN_CENTER) / SCREEN_SQRT2;
+
+    return color * (1 - dist*VIGNETTE);
+}
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float4 col;
+
+    // handle antialiasing and get pixels info
+    if (ALIAS > 1)
+    {
+        for (uint i = 0; i < ALIAS2; i++)
+        {
+            float2 tex_pos = id.xy + float2(i%ALIAS * DIV_ALIAS, i/ALIAS * DIV_ALIAS);
+            float4 ray = get_ray(tex_pos);
+            Info info = get_ray_info(ray);
+
+            col += post_pro(id.xy, ray, info);
+        }
+
+        col *= DIV_ALIAS2;
+    }
+
+    else
+    {
+        float4 ray = get_ray(id.xy);
+        Info info = get_ray_info(ray);
+        col = post_pro(id.xy, ray, info);
+    }
+
+    Result[id.xy] = col;
+}
